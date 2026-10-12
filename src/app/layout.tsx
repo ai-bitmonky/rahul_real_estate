@@ -1,0 +1,61 @@
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import { SiteStateProvider } from "@/context/SiteState";
+import { site } from "@/data/site";
+import { Sprite } from "@/components/Icons";
+import TopBar from "@/components/TopBar";
+import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
+import StickyBar from "@/components/StickyBar";
+import Reveal from "@/components/Reveal";
+import { fontVars } from "./fonts";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
+  title: { default: site.title, template: "%s · Highness Construction" },
+  description: site.description,
+  openGraph: {
+    type: "website",
+    siteName: site.name,
+    title: site.title,
+    description: site.description,
+    locale: "en_IN",
+    url: "/",
+    images: [{ url: "/img/hero-tower.jpg", width: 1242, height: 870, alt: "Shakti Paradise towers in Chinhat at dusk" }],
+  },
+  twitter: { card: "summary_large_image", title: site.title, description: site.description, images: ["/img/hero-tower.jpg"] },
+  alternates: { canonical: "/" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#F5F0E8",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" className={fontVars} suppressHydrationWarning>
+      <head>
+        {/* Enables the .reveal fade-up only when JavaScript runs */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body id="top">
+        <Sprite />
+        <a className="sr" href="#main">
+          Skip to content
+        </a>
+        <SiteStateProvider>
+          <TopBar />
+          <Nav />
+          {children}
+          <Footer />
+          <StickyBar />
+        </SiteStateProvider>
+        <Reveal />
+      </body>
+    </html>
+  );
+}
