@@ -6,6 +6,7 @@ import BookVisit from "@/components/BookVisit";
 import GuideCard from "@/components/GuideCard";
 import GuideCover from "@/components/GuideCover";
 import { Ico } from "@/components/Icons";
+import GuideRow from "@/components/mobile/GuideRow";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -34,8 +35,8 @@ export default async function GuidePage({ params }: Props) {
   const related = guides.filter((x) => x.slug !== g.slug);
 
   return (
-    <main id="main">
-      <article className="sec" id="hero" style={{ paddingTop: 44 }}>
+    <main id="main" data-title={g.title}>
+      <article className="sec gd" id="hero">
         <div className="wrap">
           <div className="article">
             <Link className="back" href="/#journal">
@@ -79,9 +80,14 @@ export default async function GuidePage({ params }: Props) {
               </h2>
             </div>
           </div>
-          <div className="grid3">
+          <div className="grid3 only-desktop">
             {related.map((r, i) => (
               <GuideCard key={r.slug} g={r} delay={i ? " d1" : ""} />
+            ))}
+          </div>
+          <div className="glist only-mobile">
+            {related.map((r) => (
+              <GuideRow key={r.slug} g={r} />
             ))}
           </div>
         </div>
