@@ -76,7 +76,7 @@ export default async function ProjectPage({ params }: Props) {
                   fill
                   priority
                   quality={85}
-                  sizes="(max-width: 1099px) 100vw, 600px"
+                  sizes="(max-width: 999px) 100vw, 600px"
                 />
                 <span className="tag br">Artist&apos;s impression</span>
               </div>

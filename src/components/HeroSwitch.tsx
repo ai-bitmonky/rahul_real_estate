@@ -44,7 +44,7 @@ export default function HeroSwitch() {
           fill
           priority
           quality={85}
-          sizes="(max-width: 699px) 100vw, (max-width: 1099px) 50vw, 560px"
+          sizes="(max-width: 699px) 100vw, (max-width: 999px) 50vw, 560px"
         />
         <Image
           className="b"
@@ -52,7 +52,7 @@ export default function HeroSwitch() {
           alt="Summit Twin Towers joined by a sky bridge"
           fill
           quality={85}
-          sizes="(max-width: 699px) 100vw, (max-width: 1099px) 50vw, 560px"
+          sizes="(max-width: 699px) 100vw, (max-width: 999px) 50vw, 560px"
         />
         <span className="tag br">Artist&apos;s impression</span>
       </div>

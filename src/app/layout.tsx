@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { SiteStateProvider } from "@/context/SiteState";
 import { site } from "@/data/site";
 import { Sprite } from "@/components/Icons";
@@ -35,9 +36,11 @@ export const viewport: Viewport = {
   themeColor: "#F5F0E8",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // set by src/middleware.ts from the user-agent: phones get the mobile layout at any width
+  const device = (await headers()).get("x-device") === "mobile" ? "mobile" : "desktop";
   return (
-    <html lang="en" className={fontVars} suppressHydrationWarning>
+    <html lang="en" className={fontVars} data-device={device} suppressHydrationWarning>
       <head>
         {/* Enables the .reveal fade-up only when JavaScript runs */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />

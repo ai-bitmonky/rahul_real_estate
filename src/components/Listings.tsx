@@ -52,7 +52,7 @@ function Card({ p, i, hidden }: { p: Project; i: number; hidden: boolean }) {
           alt={p.imageAlt}
           fill
           quality={85}
-          sizes="(max-width: 699px) 82vw, (max-width: 1099px) 50vw, 420px"
+          sizes="(max-width: 699px) 82vw, (max-width: 999px) 50vw, 420px"
         />
         <Link className="im-link" href={href} aria-label={`View ${p.name}`} tabIndex={-1} />
         <span className={`pill ${st.cls}`}>

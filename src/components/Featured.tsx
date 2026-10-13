@@ -13,7 +13,7 @@ export default function Featured() {
     <section className="feat" id="featured" aria-labelledby="h-feat">
       <div className="feat-g">
         <div className="feat-im">
-          <Image src={`/img/${p.image}.jpg`} alt={p.imageAlt} fill quality={85} sizes="(max-width: 1099px) 100vw, 50vw" />
+          <Image src={`/img/${p.image}.jpg`} alt={p.imageAlt} fill quality={85} sizes="(max-width: 999px) 100vw, 50vw" />
           <span className="tag bl">Artist&apos;s impression</span>
         </div>
         <div className="feat-b">
