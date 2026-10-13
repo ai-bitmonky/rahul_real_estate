@@ -9,6 +9,7 @@ import { big, emi, emiFrom, inr } from "@/lib/emi";
 import { BookButton } from "../Links";
 import { Ico } from "../Icons";
 import GuideRow from "./GuideRow";
+import InstallHint from "./InstallHint";
 
 const CATS: [string, string][] = [
   ["plot", "Plots"],
@@ -63,6 +64,8 @@ export default function MobileHome({ priority = false }: { priority?: boolean })
           </a>
         </div>
       </section>
+
+      <InstallHint />
 
       <Link href="/homes" className="mh-search">
         <Ico name="search" />

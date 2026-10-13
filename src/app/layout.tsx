@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: site.title, description: site.description, images: ["/img/hero-tower.jpg"] },
   alternates: { canonical: "/" },
+  applicationName: "Highness",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Highness" },
+  icons: { apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }] },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
