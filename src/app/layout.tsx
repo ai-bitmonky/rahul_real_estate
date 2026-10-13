@@ -7,8 +7,10 @@ import { Sprite } from "@/components/Icons";
 import TopBar from "@/components/TopBar";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import StickyBar from "@/components/StickyBar";
 import Reveal from "@/components/Reveal";
+import AppBar from "@/components/mobile/AppBar";
+import TabBar from "@/components/mobile/TabBar";
+import BookSheet from "@/components/mobile/BookSheet";
 import { fontVars } from "./fonts";
 import "./globals.css";
 
@@ -53,9 +55,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <SiteStateProvider>
           <TopBar />
           <Nav />
+          {/* phone app shell (hidden on desktop/tablet by CSS); replaces the old StickyBar */}
+          <AppBar />
           {children}
           <Footer />
-          <StickyBar />
+          <TabBar />
+          <BookSheet />
         </SiteStateProvider>
         <Reveal />
       </body>

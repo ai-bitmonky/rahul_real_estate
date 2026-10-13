@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useSiteState } from "@/context/SiteState";
+import { isAppShell } from "@/lib/shell";
 
 interface HashLinkProps {
   /** Section id on the home page, e.g. "properties" (no #) */
@@ -51,12 +52,36 @@ export function FilterLink({
   );
 }
 
-/** Link to the booking form (#contact on the current page) with the project prefilled. */
+/**
+ * Link to the booking form (#contact on the current page) with the project prefilled.
+ * In the phone app shell it opens the "Book a visit" bottom sheet instead.
+ */
 export function BookLink({ project, className, children }: { project: string; className?: string; children: ReactNode }) {
-  const { setBook } = useSiteState();
+  const { setBook, openBook } = useSiteState();
   return (
-    <a href="#contact" className={className} onClick={() => setBook(project)}>
+    <a
+      href="#contact"
+      className={className}
+      onClick={(e) => {
+        if (isAppShell()) {
+          e.preventDefault();
+          openBook(project);
+          return;
+        }
+        setBook(project);
+      }}
+    >
       {children}
     </a>
+  );
+}
+
+/** Button that always opens the "Book a visit" bottom sheet (used on phone-only screens). */
+export function BookButton({ project = "", className, children }: { project?: string; className?: string; children: ReactNode }) {
+  const { openBook } = useSiteState();
+  return (
+    <button type="button" className={className} onClick={() => openBook(project)}>
+      {children}
+    </button>
   );
 }

@@ -12,24 +12,38 @@ import Advisors from "@/components/Advisors";
 import Guides from "@/components/Guides";
 import Faq from "@/components/Faq";
 import BookVisit from "@/components/BookVisit";
+import MobileHome from "@/components/mobile/MobileHome";
+import { getDevice } from "@/lib/device";
 
-export default function Home() {
+export default async function Home() {
+  // Phones get only the compact app Home. Desktop/tablet user-agents get the full page, plus the
+  // app Home hidden by CSS so a narrow desktop window (< 700px) still shows the app layout.
+  if ((await getDevice()) === "mobile") {
+    return (
+      <main id="main">
+        <MobileHome priority />
+      </main>
+    );
+  }
   return (
     <main id="main">
-      <Hero />
-      <TrustStrip />
-      <Categories />
-      <Listings />
-      <WhereWeBuild />
-      <Featured />
-      <Why />
-      <HowItWorks />
-      <EmiCalculator />
-      <Stories />
-      <Advisors />
-      <Guides />
-      <Faq />
-      <BookVisit />
+      <div className="only-desktop">
+        <Hero />
+        <TrustStrip />
+        <Categories />
+        <Listings />
+        <WhereWeBuild />
+        <Featured />
+        <Why />
+        <HowItWorks />
+        <EmiCalculator />
+        <Stories />
+        <Advisors />
+        <Guides />
+        <Faq />
+        <BookVisit />
+      </div>
+      <MobileHome />
     </main>
   );
 }

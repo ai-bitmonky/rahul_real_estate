@@ -3,6 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { waText } from "@/data/site";
 import { big, emi, inr } from "@/lib/emi";
+import { BookLink } from "./Links";
 import { Ico } from "./Icons";
 
 type Key = "L" | "R" | "T";
@@ -31,7 +32,7 @@ const HOMES: [number, string][] = [
 
 const r2 = (v: number) => +v.toFixed(2);
 
-export default function EmiCalculator() {
+export default function EmiCalculator({ screen = false }: { screen?: boolean }) {
   const [val, setVal] = useState<Record<Key, number>>({ L: 50, R: 8.5, T: 20 });
   const [txt, setTxt] = useState<Record<Key, string>>({ L: "50", R: "8.5", T: "20" });
   const [quick, setQuick] = useState<number | null>(null);
@@ -47,7 +48,7 @@ export default function EmiCalculator() {
   const interest = tot - L;
 
   return (
-    <section className="sec" id="emi" aria-labelledby="h-emi">
+    <section className={`sec${screen ? " emi-screen" : ""}`} id="emi" aria-labelledby="h-emi">
       <div className="wrap">
         <div className="emi reveal">
           <div className="emi-l">
@@ -161,9 +162,9 @@ export default function EmiCalculator() {
               </div>
             </div>
             <div className="emi-cta">
-              <a className="btn btn-p" href="#contact">
+              <BookLink className="btn btn-p" project="">
                 Check loan eligibility
-              </a>
+              </BookLink>
               <a className="btn btn-wa" href={waText("Hi, I need help with a home loan")} target="_blank" rel="noopener">
                 <Ico name="wa" />
                 Talk to a loan advisor

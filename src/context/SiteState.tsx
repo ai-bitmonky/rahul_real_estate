@@ -23,6 +23,10 @@ interface SiteState {
   applyCat: (cat: string, fromCollage?: boolean) => void;
   book: { project: string; tick: number };
   setBook: (project: string) => void;
+  /** Phone app shell: the "Book a visit" bottom sheet. `n` counts openings (fresh form each time). */
+  bookSheet: { open: boolean; project: string; n: number };
+  openBook: (project?: string) => void;
+  closeBook: () => void;
 }
 
 const Ctx = createContext<SiteState | null>(null);
@@ -31,6 +35,7 @@ export function SiteStateProvider({ children }: { children: ReactNode }) {
   const [filter, setFilter] = useState<Filter>(EMPTY_FILTER);
   const [filterTick, setTick] = useState(0);
   const [book, setBookState] = useState({ project: "", tick: 0 });
+  const [bookSheet, setBookSheet] = useState({ open: false, project: "", n: 0 });
 
   const applyFilter = useCallback((f: Partial<Filter>) => {
     setFilter({ ...EMPTY_FILTER, ...f });
@@ -47,9 +52,12 @@ export function SiteStateProvider({ children }: { children: ReactNode }) {
 
   const setBook = useCallback((project: string) => setBookState((b) => ({ project, tick: b.tick + 1 })), []);
 
+  const openBook = useCallback((project = "") => setBookSheet((b) => ({ open: true, project, n: b.n + 1 })), []);
+  const closeBook = useCallback(() => setBookSheet((b) => ({ ...b, open: false })), []);
+
   const value = useMemo(
-    () => ({ filter, filterTick, applyFilter, applyCat, book, setBook }),
-    [filter, filterTick, applyFilter, applyCat, book, setBook],
+    () => ({ filter, filterTick, applyFilter, applyCat, book, setBook, bookSheet, openBook, closeBook }),
+    [filter, filterTick, applyFilter, applyCat, book, setBook, bookSheet, openBook, closeBook],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

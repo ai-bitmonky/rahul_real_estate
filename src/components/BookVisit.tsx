@@ -17,7 +17,17 @@ const CHECKS: Record<Field, (v: string) => boolean> = {
   project: () => true,
 };
 
-export default function BookVisit({ num = "12", defaultProject = "" }: { num?: string; defaultProject?: string }) {
+export default function BookVisit({
+  num = "12",
+  defaultProject = "",
+  variant = "section",
+}: {
+  num?: string;
+  defaultProject?: string;
+  /** "sheet" renders only the form card (with its own ids) for the phone bottom sheet */
+  variant?: "section" | "sheet";
+}) {
+  const px = variant === "sheet" ? "s" : "";
   const { book } = useSiteState();
   const [vals, setVals] = useState({ name: "", phone: "", project: defaultProject, day: "Tomorrow" });
   const [wa, setWa] = useState(true);
@@ -73,6 +83,96 @@ export default function BookVisit({ num = "12", defaultProject = "" }: { num?: s
 
   const f = (k: Field) => `f${k === "project" ? " w" : ""}${err[k] ? " err" : ""}`;
 
+  const box = (
+    <div className={`form${variant === "sheet" ? " in-sheet" : " reveal d1"}${status === "done" ? " done" : ""}`} id={`${px}formBox`}>
+      <form id={`${px}bookForm`} noValidate onSubmit={submit}>
+        {variant === "section" && <h3>Book a free site visit</h3>}
+        <p>Takes 30 seconds. No login, no OTP, no payment — every field is optional.</p>
+        <div className="fg">
+          <div className={f("name")}>
+            <label htmlFor={`${px}fN`}>Your name</label>
+            <input
+              ref={refs.name}
+              id={`${px}fN`}
+              name="name"
+              autoComplete="name"
+              placeholder="e.g. Priya Mishra"
+              value={vals.name}
+              aria-invalid={err.name}
+              onChange={(e) => change("name", e.target.value)}
+            />
+            <span className="e">Please enter your name.</span>
+          </div>
+          <div className={f("phone")}>
+            <label htmlFor={`${px}fP`}>Phone number</label>
+            <input
+              ref={refs.phone}
+              id={`${px}fP`}
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="Mobile number (optional)"
+              value={vals.phone}
+              aria-invalid={err.phone}
+              onChange={(e) => change("phone", e.target.value)}
+            />
+            <span className="e">Please check the mobile number.</span>
+          </div>
+          <div className={f("project")}>
+            <label htmlFor={`${px}fJ`}>Project</label>
+            <select
+              ref={refs.project}
+              id={`${px}fJ`}
+              name="project"
+              value={vals.project}
+              aria-invalid={err.project}
+              onChange={(e) => change("project", e.target.value)}
+            >
+              <option value="">Choose a project</option>
+              {projectNames.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <span className="e">Please choose a project.</span>
+          </div>
+          <div className="f w">
+            <label htmlFor={`${px}fD`}>Preferred day</label>
+            <select id={`${px}fD`} name="day" value={vals.day} onChange={(e) => change("day", e.target.value)}>
+              {DAYS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <label className="chk">
+          <input type="checkbox" checked={wa} onChange={(e) => setWa(e.target.checked)} /> Also message me on WhatsApp
+        </label>
+        <button className="btn btn-p" type="submit" disabled={status === "sending"}>
+          {status === "sending" ? "Sending…" : "Book my visit"} <Ico name="arrow" className="arr" />
+        </button>
+        <p className="fine" role={status === "fail" ? "alert" : undefined}>
+          {status === "fail"
+            ? `Sorry, that did not go through. Please try again or call ${site.phone}.`
+            : "We never share your number. No spam calls."}
+        </p>
+      </form>
+      <div className="ok-msg" role="status">
+        <div className="ic">
+          <Ico name="check" />
+        </div>
+        <h3>Visit request received</h3>
+        <p id={`${px}okT`}>Thanks, {advisor} will call you within 2 hours.</p>
+      </div>
+    </div>
+  );
+
+  if (variant === "sheet") return box;
+
   return (
     <section className="book" id="contact" aria-labelledby="h-book">
       <div className="wrap book-g">
@@ -105,91 +205,7 @@ export default function BookVisit({ num = "12", defaultProject = "" }: { num?: s
             </a>
           </div>
         </div>
-        <div className={`form reveal d1${status === "done" ? " done" : ""}`} id="formBox">
-          <form id="bookForm" noValidate onSubmit={submit}>
-            <h3>Book a free site visit</h3>
-            <p>Takes 30 seconds. No login, no OTP, no payment — every field is optional.</p>
-            <div className="fg">
-              <div className={f("name")}>
-                <label htmlFor="fN">Your name</label>
-                <input
-                  ref={refs.name}
-                  id="fN"
-                  name="name"
-                  autoComplete="name"
-                  placeholder="e.g. Priya Mishra"
-                  value={vals.name}
-                  aria-invalid={err.name}
-                  onChange={(e) => change("name", e.target.value)}
-                />
-                <span className="e">Please enter your name.</span>
-              </div>
-              <div className={f("phone")}>
-                <label htmlFor="fP">Phone number</label>
-                <input
-                  ref={refs.phone}
-                  id="fP"
-                  name="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel"
-                  placeholder="Mobile number (optional)"
-                  value={vals.phone}
-                  aria-invalid={err.phone}
-                  onChange={(e) => change("phone", e.target.value)}
-                />
-                <span className="e">Please check the mobile number.</span>
-              </div>
-              <div className={f("project")}>
-                <label htmlFor="fJ">Project</label>
-                <select
-                  ref={refs.project}
-                  id="fJ"
-                  name="project"
-                  value={vals.project}
-                  aria-invalid={err.project}
-                  onChange={(e) => change("project", e.target.value)}
-                >
-                  <option value="">Choose a project</option>
-                  {projectNames.map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-                <span className="e">Please choose a project.</span>
-              </div>
-              <div className="f w">
-                <label htmlFor="fD">Preferred day</label>
-                <select id="fD" name="day" value={vals.day} onChange={(e) => change("day", e.target.value)}>
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <label className="chk">
-              <input type="checkbox" checked={wa} onChange={(e) => setWa(e.target.checked)} /> Also message me on WhatsApp
-            </label>
-            <button className="btn btn-p" type="submit" disabled={status === "sending"}>
-              {status === "sending" ? "Sending…" : "Book my visit"} <Ico name="arrow" className="arr" />
-            </button>
-            <p className="fine" role={status === "fail" ? "alert" : undefined}>
-              {status === "fail"
-                ? `Sorry, that did not go through. Please try again or call ${site.phone}.`
-                : "We never share your number. No spam calls."}
-            </p>
-          </form>
-          <div className="ok-msg" role="status">
-            <div className="ic">
-              <Ico name="check" />
-            </div>
-            <h3>Visit request received</h3>
-            <p id="okT">Thanks, {advisor} will call you within 2 hours.</p>
-          </div>
-        </div>
+        {box}
       </div>
     </section>
   );

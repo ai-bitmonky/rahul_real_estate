@@ -7,8 +7,10 @@ import { useSiteState } from "@/context/SiteState";
 import { listedProjects, STATUS, type Project } from "@/data/projects";
 import { site, waText } from "@/data/site";
 import { big, emiFrom, inr } from "@/lib/emi";
-import { BUDGETS } from "./SearchCard";
+import { localities } from "@/data/localities";
+import { BUDGETS, TYPES } from "./SearchCard";
 import { BookLink } from "./Links";
+import Sheet from "./mobile/Sheet";
 import SwipeCounter from "./SwipeCounter";
 import { Ico } from "./Icons";
 
@@ -31,7 +33,10 @@ const CHIPS: [string, string][] = [
 
 const DELAYS = ["", " d1", " d2"];
 
-function Card({ p, i, hidden }: { p: Project; i: number; hidden: boolean }) {
+/** ?type= values used by the app's category chips → filter */
+const QUERY_TYPES: Record<string, string> = { plot: "plots", villa: "villas", apartment: "apartments", plots: "plots", villas: "villas", apartments: "apartments" };
+
+function Card({ p, i, hidden, sizes }: { p: Project; i: number; hidden: boolean; sizes: string }) {
   const st = STATUS[p.status];
   const [saved, setSaved] = useState(false);
   const toggleSave = (e: MouseEvent<HTMLButtonElement>) => {
@@ -52,7 +57,7 @@ function Card({ p, i, hidden }: { p: Project; i: number; hidden: boolean }) {
           alt={p.imageAlt}
           fill
           quality={85}
-          sizes="(max-width: 699px) 82vw, (max-width: 999px) 50vw, 420px"
+          sizes={sizes}
         />
         <Link className="im-link" href={href} aria-label={`View ${p.name}`} tabIndex={-1} />
         <span className={`pill ${st.cls}`}>
@@ -108,9 +113,91 @@ function Card({ p, i, hidden }: { p: Project; i: number; hidden: boolean }) {
   );
 }
 
-export default function Listings() {
+/** Location / type / budget fields from the search card, in the phone "Filters" sheet. */
+function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { filter, applyFilter } = useSiteState();
+  const [loc, setLoc] = useState(filter.loc);
+  const [type, setType] = useState(filter.type);
+  const [bud, setBud] = useState(filter.bud);
+  useEffect(() => {
+    if (!open) return;
+    setLoc(filter.loc);
+    setType(TYPES.res.some(([v]) => v === filter.type) ? filter.type : "");
+    setBud(filter.bud);
+  }, [open, filter]);
+  return (
+    <Sheet open={open} onClose={onClose} title="Filters">
+      <form
+        className="fsheet"
+        onSubmit={(e) => {
+          e.preventDefault();
+          applyFilter({ loc, type, bud });
+          onClose();
+        }}
+      >
+        <div className="f">
+          <label htmlFor="fsLoc">Location</label>
+          <select id="fsLoc" value={loc} onChange={(e) => setLoc(e.target.value)}>
+            <option value="">Any location</option>
+            {localities.map((l) => (
+              <option key={l.name} value={l.name}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="f">
+          <label htmlFor="fsType">Type</label>
+          <select id="fsType" value={type} onChange={(e) => setType(e.target.value)}>
+            {TYPES.res.map(([v, t]) => (
+              <option key={v} value={v}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="f">
+          <label htmlFor="fsBud">Budget</label>
+          <select id="fsBud" value={bud} onChange={(e) => setBud(e.target.value)}>
+            {BUDGETS.map(([v, t]) => (
+              <option key={v} value={v}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="fsheet-act">
+          <button
+            type="button"
+            className="btn btn-o"
+            onClick={() => {
+              setLoc("");
+              setType("");
+              setBud("");
+            }}
+          >
+            Reset
+          </button>
+          <button type="submit" className="btn btn-p">
+            Apply
+          </button>
+        </div>
+      </form>
+    </Sheet>
+  );
+}
+
+export default function Listings({ screen = false, initialType = "" }: { screen?: boolean; initialType?: string }) {
   const { filter: S, filterTick, applyFilter } = useSiteState();
   const grid = useRef<HTMLDivElement>(null);
+  const [sheet, setSheet] = useState(false);
+
+  // /homes?type=plot|villa|apartment|com (from the app's category chips)
+  useEffect(() => {
+    if (!screen) return;
+    if (initialType === "com") applyFilter({ kind: "com" });
+    else applyFilter({ type: QUERY_TYPES[initialType] ?? "" });
+  }, [screen, initialType, applyFilter]);
 
   const visible = useMemo(() => {
     const [lo, hi] = S.bud ? S.bud.split("-").map(Number) : [0, 1e9];
@@ -136,9 +223,27 @@ export default function Listings() {
   const chipOnly = parts.length === 1 && !!S.type && CHIPS.some(([f]) => f === S.type);
   const showRes = parts.length > 0 && !chipOnly;
   const com = S.kind === "com";
+  const nFilters = [S.loc, S.bud, S.type && !CHIPS.some(([f]) => f === S.type) ? S.type : "", com ? "com" : ""].filter(Boolean).length;
+
+  const chips = CHIPS.map(([f, t]) => (
+    <button
+      key={t}
+      type="button"
+      aria-pressed={S.kind === "res" && S.type === f}
+      data-f={f}
+      onClick={() => applyFilter(screen ? { type: f, loc: S.loc, bud: S.bud } : { type: f })}
+    >
+      {t}
+    </button>
+  ));
 
   return (
-    <section className="sec band-iv" id="properties" aria-labelledby="h-props" style={{ borderTop: "1px solid var(--line)" }}>
+    <section
+      className={`sec band-iv${screen ? " lst-screen" : ""}`}
+      id="properties"
+      aria-labelledby="h-props"
+      style={{ borderTop: "1px solid var(--line)" }}
+    >
       <div className="wrap">
         <div className="sh">
           <div>
@@ -150,33 +255,42 @@ export default function Listings() {
             </h2>
             <p className="meta reveal d2">Price, possession date and RERA number on every card.</p>
           </div>
-          <div className="chips reveal d2" id="chips" role="group" aria-label="Filter homes">
-            {CHIPS.map(([f, t]) => (
-              <button
-                key={t}
-                type="button"
-                aria-pressed={S.kind === "res" && S.type === f}
-                data-f={f}
-                onClick={() => applyFilter({ type: f })}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <div className="shr">
-            <span className="swipe-hint">Swipe →</span>
-            <SwipeCounter target="grid" initial={`1 / ${listedProjects.length}`} version={filterTick} />
-          </div>
+          {!screen && (
+            <div className="chips reveal d2" id="chips" role="group" aria-label="Filter homes">
+              {chips}
+            </div>
+          )}
+          {!screen && (
+            <div className="shr">
+              <span className="swipe-hint">Swipe →</span>
+              <SwipeCounter target="grid" initial={`1 / ${listedProjects.length}`} version={filterTick} />
+            </div>
+          )}
         </div>
+        {screen && (
+          <div className="fbar" role="group" aria-label="Filter homes">
+            {chips}
+            <button type="button" className="fbar-f" aria-haspopup="dialog" onClick={() => setSheet(true)}>
+              <Ico name="filter" />
+              Filters{nFilters ? ` · ${nFilters}` : ""}
+            </button>
+          </div>
+        )}
         <p className={`res${showRes ? " on" : ""}`} id="res" aria-live="polite">
           <span id="resT">{showRes ? `Showing ${n} ${n === 1 ? "home" : "homes"} · ${parts.join(" · ")}` : ""}</span>
           <button type="button" id="resX" onClick={() => applyFilter({})}>
             Clear filters
           </button>
         </p>
-        <div className="grid3 swipe" id="grid" ref={grid}>
+        <div className={`grid3${screen ? " lst" : " swipe"}`} id="grid" ref={grid}>
           {listedProjects.map((p, i) => (
-            <Card key={p.slug} p={p} i={i} hidden={!visible[i]} />
+            <Card
+              key={p.slug}
+              p={p}
+              i={i}
+              hidden={!visible[i]}
+              sizes={screen ? "(max-width: 999px) 100vw, 420px" : "(max-width: 699px) 82vw, (max-width: 999px) 50vw, 420px"}
+            />
           ))}
           <div className={`empty${n ? "" : " on"}`} id="empty">
             <h3 id="emT">{com ? "Commercial spaces are shared on request" : "No exact match yet"}</h3>
@@ -192,6 +306,7 @@ export default function Listings() {
           </div>
         </div>
       </div>
+      {screen && <FilterSheet open={sheet} onClose={() => setSheet(false)} />}
     </section>
   );
 }
