@@ -26,14 +26,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const name = str(body.name);
-  const phone = normalisePhone(str(body.phone));
-  const project = str(body.project);
-  const errors: Record<string, string> = {};
-  if (name.length < 2 || name.length > 80) errors.name = "Please enter your name.";
-  if (!phone) errors.phone = "Please enter a 10-digit mobile number.";
-  if (!projectNames.includes(project)) errors.project = "Please choose a project.";
-  if (Object.keys(errors).length || !phone) return NextResponse.json({ ok: false, errors }, { status: 400 });
+  // Nothing is mandatory for now (no login / OTP / required fields).
+  // We keep whatever the visitor typed, tidy the phone number when it is a valid Indian mobile,
+  // and fall back to safe defaults so every request is accepted and logged.
+  const name = str(body.name).slice(0, 80) || "Visitor";
+  const rawPhone = str(body.phone).slice(0, 20);
+  const phone = normalisePhone(rawPhone) ?? rawPhone;
+  const projectIn = str(body.project);
+  const project = projectNames.includes(projectIn) ? projectIn : projectIn.slice(0, 80) || "Not decided yet";
 
   const lead: Lead = {
     name,

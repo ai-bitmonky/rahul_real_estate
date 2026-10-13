@@ -4,16 +4,17 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSiteState } from "@/context/SiteState";
 import { projectNames } from "@/data/projects";
 import { site } from "@/data/site";
-import { normalisePhone } from "@/lib/validate";
 import { Ico } from "./Icons";
 
 type Field = "name" | "phone" | "project";
 const DAYS = ["Today", "Tomorrow", "This weekend", "Next week"];
 
+// For now nothing is mandatory: no login, no OTP, no required fields.
+// A phone number, if typed, is accepted in any format.
 const CHECKS: Record<Field, (v: string) => boolean> = {
-  name: (v) => v.trim().length >= 2,
-  phone: (v) => normalisePhone(v) !== null,
-  project: (v) => !!v,
+  name: () => true,
+  phone: () => true,
+  project: () => true,
 };
 
 export default function BookVisit({ num = "12", defaultProject = "" }: { num?: string; defaultProject?: string }) {
@@ -107,7 +108,7 @@ export default function BookVisit({ num = "12", defaultProject = "" }: { num?: s
         <div className={`form reveal d1${status === "done" ? " done" : ""}`} id="formBox">
           <form id="bookForm" noValidate onSubmit={submit}>
             <h3>Book a free site visit</h3>
-            <p>Takes 30 seconds. No payment needed.</p>
+            <p>Takes 30 seconds. No login, no OTP, no payment — every field is optional.</p>
             <div className="fg">
               <div className={f("name")}>
                 <label htmlFor="fN">Your name</label>
@@ -132,12 +133,12 @@ export default function BookVisit({ num = "12", defaultProject = "" }: { num?: s
                   type="tel"
                   inputMode="numeric"
                   autoComplete="tel"
-                  placeholder="10-digit mobile"
+                  placeholder="Mobile number (optional)"
                   value={vals.phone}
                   aria-invalid={err.phone}
                   onChange={(e) => change("phone", e.target.value)}
                 />
-                <span className="e">Please enter a 10-digit mobile number.</span>
+                <span className="e">Please check the mobile number.</span>
               </div>
               <div className={f("project")}>
                 <label htmlFor="fJ">Project</label>
